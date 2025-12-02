@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "11563356982",
+    "project_id": "step-chat-ag-1764700261",
+    "storage_bucket": "step-chat-ag-1764700261.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:11563356982:android:cee82db5bdf5183707d997",
+        "android_client_info": {
+          "package_name": "com.example.step_chat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-GM7FYC7P4-PPfkz9eqosZz4i09aWqfM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
