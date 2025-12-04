@@ -7,10 +7,7 @@ import '../services/storage_service.dart';
 class ProcedureDetailScreen extends StatefulWidget {
   final Procedure procedure;
 
-  const ProcedureDetailScreen({
-    super.key,
-    required this.procedure,
-  });
+  const ProcedureDetailScreen({super.key, required this.procedure});
 
   @override
   State<ProcedureDetailScreen> createState() => _ProcedureDetailScreenState();
@@ -34,9 +31,13 @@ class _ProcedureDetailScreenState extends State<ProcedureDetailScreen> {
 
     try {
       for (final step in widget.procedure.steps) {
-        if (step.imagePath != null && step.imagePath!.isNotEmpty) {
-          final url = await _storageService.getImageUrl(step.imagePath!);
-          _imageUrlCache[step.imagePath!] = url;
+        if (step.image.isNotEmpty) {
+          if (step.image.startsWith('http')) {
+            _imageUrlCache[step.image] = step.image;
+          } else {
+            final url = await _storageService.getImageUrl(step.image);
+            _imageUrlCache[step.image] = url;
+          }
         }
       }
     } catch (e) {
@@ -118,9 +119,11 @@ class _ProcedureDetailScreenState extends State<ProcedureDetailScreen> {
                   const SizedBox(height: 16),
 
                   // Steps List
-                  ...widget.procedure.steps
-                      .map((step) => _buildStepCard(step))
-                      .toList(),
+                  ...widget.procedure.steps.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final step = entry.value;
+                    return _buildStepCard(index + 1, step);
+                  }).toList(),
                 ],
               ),
             ),
@@ -156,7 +159,7 @@ class _ProcedureDetailScreenState extends State<ProcedureDetailScreen> {
     );
   }
 
-  Widget _buildStepCard(ProcedureStep step) {
+  Widget _buildStepCard(int stepNumber, ProcedureStep step) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -168,7 +171,7 @@ class _ProcedureDetailScreenState extends State<ProcedureDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Step Number
+          // Step Number and Title
           Row(
             children: [
               Container(
@@ -180,7 +183,7 @@ class _ProcedureDetailScreenState extends State<ProcedureDetailScreen> {
                 ),
                 child: Center(
                   child: Text(
-                    '${step.stepNumber}',
+                    '$stepNumber',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -190,12 +193,14 @@ class _ProcedureDetailScreenState extends State<ProcedureDetailScreen> {
                 ),
               ),
               const SizedBox(width: 12),
-              const Text(
-                'Step',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black54,
+              Expanded(
+                child: Text(
+                  step.title.isNotEmpty ? step.title : 'Step $stepNumber',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
                 ),
               ),
             ],
@@ -203,9 +208,9 @@ class _ProcedureDetailScreenState extends State<ProcedureDetailScreen> {
 
           const SizedBox(height: 12),
 
-          // Step Text
+          // Step Description
           Text(
-            step.text,
+            step.description,
             style: const TextStyle(
               fontSize: 16,
               color: Colors.black87,
@@ -214,11 +219,11 @@ class _ProcedureDetailScreenState extends State<ProcedureDetailScreen> {
           ),
 
           // Step Image
-          if (step.imagePath != null && step.imagePath!.isNotEmpty)
+          if (step.image.isNotEmpty)
             Column(
               children: [
                 const SizedBox(height: 16),
-                _buildStepImage(step.imagePath!),
+                _buildStepImage(step.image),
               ],
             ),
         ],
@@ -234,9 +239,7 @@ class _ProcedureDetailScreenState extends State<ProcedureDetailScreen> {
           color: Colors.grey[200],
           borderRadius: BorderRadius.circular(8),
         ),
-        child: const Center(
-          child: CircularProgressIndicator(),
-        ),
+        child: const Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -250,11 +253,7 @@ class _ProcedureDetailScreenState extends State<ProcedureDetailScreen> {
           borderRadius: BorderRadius.circular(8),
         ),
         child: const Center(
-          child: Icon(
-            Icons.image_not_supported,
-            size: 48,
-            color: Colors.grey,
-          ),
+          child: Icon(Icons.image_not_supported, size: 48, color: Colors.grey),
         ),
       );
     }
@@ -267,19 +266,13 @@ class _ProcedureDetailScreenState extends State<ProcedureDetailScreen> {
         placeholder: (context, url) => Container(
           height: 200,
           color: Colors.grey[200],
-          child: const Center(
-            child: CircularProgressIndicator(),
-          ),
+          child: const Center(child: CircularProgressIndicator()),
         ),
         errorWidget: (context, url, error) => Container(
           height: 200,
           color: Colors.grey[200],
           child: const Center(
-            child: Icon(
-              Icons.error_outline,
-              size: 48,
-              color: Colors.grey,
-            ),
+            child: Icon(Icons.error_outline, size: 48, color: Colors.grey),
           ),
         ),
       ),
